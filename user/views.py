@@ -4,7 +4,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer
+from .models import Customer, Specialist
+from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer, CustomerSerializer
 
 
 # Create your views here.
@@ -14,7 +15,16 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        user = serializer.save()
+        if request.data['type'] == "customer":
+            user.is_customer = True
+            user.save()
+            c = Customer(user=user)
+            c.save()
+        else:
+            user.is_specialist = True
+            s = Specialist(user=user)
+            s.save()
         return Response(serializer.data)
 
 
@@ -59,6 +69,18 @@ class UserView(APIView):
         # send_email()
         user = request.user
         serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        customers = Customer.objects.filter(user=user)
+        if len(customers)>0:
+            serializer = CustomerSerializer(customers[0])
         return Response(serializer.data)
 
 

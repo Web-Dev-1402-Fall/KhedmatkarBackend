@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from .models import User
+from .models import User, Customer, Specialist
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,6 +19,24 @@ class UserSerializer(serializers.ModelSerializer):
                                         first_name=validated_data['first_name'], last_name=validated_data['last_name'],
                                         )
         return user
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Customer
+        fields = ('user',)
+        depth = 1
+
+
+class SpecialistSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Specialist
+        fields = ('user',)
+        depth = 1
 
 
 class LoginSerializer(serializers.Serializer):
