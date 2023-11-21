@@ -4,7 +4,7 @@ from service.entities import ServiceRequestStatus
 
 
 class ServiceRequest(models.Model):
-    # specialty = models.ForeignKey('Specialty', on_delete=models.CASCADE)
+    specialty = models.ForeignKey('Specialty', on_delete=models.CASCADE)
     description = models.TextField()
     address = models.CharField(max_length=255)
     reception_date = models.DateTimeField()

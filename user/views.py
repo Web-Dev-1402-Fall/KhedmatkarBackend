@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Customer, Specialist
+from .models import Customer, Specialist, Admin
 from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer, CustomerSerializer
 
 
@@ -23,8 +23,25 @@ class RegisterView(APIView):
             c.save()
         else:
             user.is_specialist = True
+            user.save()
             s = Specialist(user=user)
             s.save()
+        return Response(serializer.data)
+
+
+class AdminRegisterView(APIView):
+    # Todo change AllowAny
+    permission_classes = [AllowAny, ]
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        user.is_admin = True
+        user.save()
+        a = Admin(user=user)
+        a.save()
+
         return Response(serializer.data)
 
 
@@ -79,7 +96,7 @@ class ProfileView(APIView):
         user = request.user
         serializer = UserSerializer(user)
         customers = Customer.objects.filter(user=user)
-        if len(customers)>0:
+        if len(customers) > 0:
             serializer = CustomerSerializer(customers[0])
         return Response(serializer.data)
 
