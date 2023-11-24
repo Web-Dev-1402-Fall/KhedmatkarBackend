@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from user.models import Customer
-from .models import ServiceType
+from .models import ServiceType, ServiceRequest
 from .serializers import ServiceTypeSerializer, ServiceRequestSerializer
 from user.decorators import customer_required, specialist_required
 
@@ -30,11 +30,13 @@ class NewSpecialityView(APIView):
             return Response(specialty.data, status=status.HTTP_201_CREATED)
         return Response(specialty.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 # 1. Search for service types
 class ServiceTypeSearchView(APIView):
     def get(self, request):
         query = request.query_params.get('query', '')
         service_types = ServiceType.objects.filter(name__icontains=query)
+        print(service_types)
         serializer = ServiceTypeSerializer(service_types, many=True)
         return Response(serializer.data)
 
