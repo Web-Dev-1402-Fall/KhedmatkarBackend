@@ -13,4 +13,3 @@ class ServiceRequestListViewSerializer(serializers.Serializer):
     specialty = SpecialtySerializer()
     accepted_specialist = UserSerializer()
     candidate_specialist = UserSerializer()
-    geo_point = serializers.JSONField()  # Assuming GeoPoint is represented as JSON

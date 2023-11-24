@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .entities.ServiceRequest import ServiceRequest
+from user.models import Customer
 from .models import ServiceType
 from .serializers import ServiceTypeSerializer, ServiceRequestSerializer
 from user.decorators import customer_required, specialist_required
@@ -47,7 +47,8 @@ class ServiceRequestCreateView(APIView):
     def post(self, request):
         serializer = ServiceRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(customer=request.user)
+        customer_user = Customer.objects.get(user=request.user)
+        serializer.save(customer=customer_user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -152,7 +153,7 @@ from .models import Specialty
 
 
 class SpecialtyDeleteView(DestroyAPIView):
-    queryset = Specialty.Specialty.objects.all()
+    queryset = Specialty.objects.all()
     lookup_field = 'id'
 
 
@@ -161,5 +162,5 @@ from .models import Specialty
 
 
 class SpecialtyListView(ListAPIView):
-    queryset = Specialty.Specialty.objects.all()
+    queryset = Specialty.objects.all()
     serializer_class = SpecialtySerializer

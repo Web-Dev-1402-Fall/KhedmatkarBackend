@@ -7,4 +7,3 @@ class ServiceRequestCreationSerializer(serializers.Serializer):
     address = serializers.CharField(required=True)
     reception_date = serializers.DateField(format='%Y-%m-%d', input_formats=['%Y-%m-%d'], required=True)
     specialist_id = serializers.IntegerField(required=False)
-    geo_point = serializers.JSONField(required=False)  # Assuming GeoPoint is represented as JSON
