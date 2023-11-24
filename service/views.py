@@ -7,13 +7,159 @@ from rest_framework.views import APIView
 from service.entities.serializers.SpecialtySerializer import SpecialtySerializer
 from user.decorators import admin_required
 
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .entities.ServiceRequest import ServiceRequest
+from .models import ServiceType
+from .serializers import ServiceTypeSerializer, ServiceRequestSerializer
+from user.decorators import customer_required, specialist_required
+
 
 # Create your views here.
 class NewSpecialityView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
 
     @admin_required
     def post(self, request):
         specialty = SpecialtySerializer(data=request.data)
-        specialty.is_valid()
-        return Response(status.HTTP_200_OK)
+        if specialty.is_valid():
+            specialty.save()
+            return Response(specialty.data, status=status.HTTP_201_CREATED)
+        return Response(specialty.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# 1. Search for service types
+class ServiceTypeSearchView(APIView):
+    def get(self, request):
+        query = request.query_params.get('query', '')
+        service_types = ServiceType.objects.filter(name__icontains=query)
+        serializer = ServiceTypeSerializer(service_types, many=True)
+        return Response(serializer.data)
+
+
+# 2. Register a service request
+class ServiceRequestCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @customer_required
+    def post(self, request):
+        serializer = ServiceRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(customer=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+# 3. Accept or reject initial request by specialist
+class ServiceRequestUpdateBySpecialistView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @specialist_required
+    def patch(self, request, pk):
+        service_request = ServiceRequest.objects.get(pk=pk)
+        serializer = ServiceRequestSerializer(service_request, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+# Continue with similar views for the other features...
+
+class ServiceRequestUpdateByCustomerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @customer_required
+    def patch(self, request, pk):
+        service_request = ServiceRequest.objects.get(pk=pk)
+        if request.user != service_request.customer.user:
+            return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = ServiceRequestSerializer(service_request, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class ServiceRequestListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        service_requests = ServiceRequest.objects.all()
+        serializer = ServiceRequestSerializer(service_requests, many=True)
+        return Response(serializer.data)
+
+
+class ServiceTypeCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @admin_required
+    def post(self, request):
+        serializer = ServiceTypeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ServiceTypeDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @admin_required
+    def delete(self, request, pk):
+        service_type = ServiceType.objects.get(pk=pk)
+        service_type.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AllServiceRequestListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @admin_required
+    def get(self, request):
+        service_requests = ServiceRequest.objects.all()
+        serializer = ServiceRequestSerializer(service_requests, many=True)
+        return Response(serializer.data)
+
+
+class ServiceRequestUpdateAddressView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @customer_required
+    def patch(self, request, pk):
+        service_request = ServiceRequest.objects.get(pk=pk)
+        if request.user != service_request.customer.user:
+            return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = ServiceRequestSerializer(service_request, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+
+class ServiceRequestCompleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @customer_required
+    def patch(self, request, pk):
+        service_request = ServiceRequest.objects.get(pk=pk)
+        if request.user != service_request.customer.user:
+            return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        service_request.status = 'completed'
+        service_request.save()
+        return Response(ServiceRequestSerializer(service_request).data)
+
+
+from rest_framework.generics import DestroyAPIView
+from .models import Specialty
+
+
+class SpecialtyDeleteView(DestroyAPIView):
+    queryset = Specialty.Specialty.objects.all()
+    lookup_field = 'id'
+
+
+from rest_framework.generics import ListAPIView
+from .models import Specialty
+
+
+class SpecialtyListView(ListAPIView):
+    queryset = Specialty.Specialty.objects.all()
+    serializer_class = SpecialtySerializer

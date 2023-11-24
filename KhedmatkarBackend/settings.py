@@ -28,6 +28,13 @@ ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework.authentication.SessionAuthentication',
+#         'rest_framework.authentication.BasicAuthentication',
+#         'rest_framework.authentication.TokenAuthentication',
+#     )
+# }
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -130,6 +137,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
 ]
-CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', 'http://localhost:3000']
+# CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', 'http://localhost:3000']
+CSRF_TRUSTED_ORIGINS = ['http://*', 'https://*']
 
 APPEND_SLASH = False

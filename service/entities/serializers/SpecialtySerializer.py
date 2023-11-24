@@ -1,7 +1,12 @@
 from rest_framework import serializers
 
+from service.entities.Specialty import Specialty
 
-class SpecialtySerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=False)
-    name = serializers.CharField(required=True)
-    parent_id = serializers.IntegerField(required=False)
+
+class SpecialtySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Specialty
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return Specialty.objects.create(**validated_data)
