@@ -55,6 +55,10 @@ class ServiceRequestCreateView(APIView):
 
 
 # 3. Accept or reject initial request by specialist
+from .entities import ServiceRequestStatus
+from user.models import Specialist
+
+
 class ServiceRequestUpdateBySpecialistView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -63,11 +67,13 @@ class ServiceRequestUpdateBySpecialistView(APIView):
         service_request = ServiceRequest.objects.get(pk=pk)
         serializer = ServiceRequestSerializer(service_request, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        if serializer.validated_data.get('status') == ServiceRequestStatus.ServiceRequestStatus.SPECIALIST_ACCEPTED:
+            specialist_user = Specialist.objects.get(user=request.user)
+            service_request.accepted_specialist = specialist_user
+            service_request.save()
         serializer.save()
         return Response(serializer.data)
 
-
-# Continue with similar views for the other features...
 
 class ServiceRequestUpdateByCustomerView(APIView):
     permission_classes = [IsAuthenticated]
