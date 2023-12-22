@@ -20,6 +20,17 @@ class UserSerializer(serializers.ModelSerializer):
                                         )
         return user
 
+    def update(self, instance, validated_data):
+        validated_data.pop('id', None)
+        validated_data.pop('username', None)
+        validated_data.pop('password', None)
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        instance.save()
+        return instance
+
 
 class CustomerSerializer(serializers.ModelSerializer):
     user = UserSerializer()

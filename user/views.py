@@ -3,8 +3,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from .models import Customer, Specialist, Admin
+from django.db.models import Value
+from django.db.models.functions import Concat
+from .models import Customer, Specialist, Admin, User
 from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer, CustomerSerializer
 
 
@@ -89,6 +90,28 @@ class UserView(APIView):
         return Response(serializer.data)
 
 
+class SpecialistInfoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        user = request.user
+        users = User.objects.filter(pk=pk, is_specialist=True)
+        if len(users) > 0:
+            return Response(UserSerializer(users[0]).data, status=status.HTTP_200_OK)
+
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+class SpecialistSearchView(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request):
+        query = request.query_params.get('query', '')
+        user_specialists = User.objects.annotate(full_name=Concat('first_name', Value(' '), 'last_name')). \
+            filter(full_name__icontains=query, is_specialist=True)
+        serializer = UserSerializer(user_specialists, many=True)
+        return Response(serializer.data)
+
+
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -99,6 +122,16 @@ class ProfileView(APIView):
         if len(customers) > 0:
             serializer = CustomerSerializer(customers[0])
         return Response(serializer.data)
+
+
+class UserInfoModificationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
 
 class LogoutView(APIView):
