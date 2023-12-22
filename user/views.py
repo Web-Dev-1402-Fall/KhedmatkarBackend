@@ -101,6 +101,7 @@ class SpecialistInfoView(APIView):
 
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
+
 class SpecialistSearchView(APIView):
     permission_classes = [IsAuthenticated, ]
 
