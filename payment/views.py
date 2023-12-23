@@ -1,3 +1,74 @@
-from django.shortcuts import render
+import time
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
-# Create your views here.
+from .models import Wallet, Transaction
+from user.models import User
+from .serializers import WalletSerializer, TransactionSerializer
+
+
+class WalletListAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def post(self, request):
+        serializer = WalletSerializer(data=request.data)
+        if serializer.is_valid():
+            if not Wallet.objects.filter(user=request.user).exists():
+                Wallet(user=request.user, balance=serializer.validated_data['balance']).save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({"error": "Wallet is already exist!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WalletDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request, pk):
+        wallet = Wallet.objects.get(pk=pk)
+        serializer = WalletSerializer(wallet)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        wallet = Wallet.objects.get(pk=pk)
+        serializer = WalletSerializer(wallet, data=request.data)
+        if serializer.is_valid():
+            wallet.balance += serializer.validated_data['balance']
+            wallet.save()
+            Transaction(wallet=wallet, amount=serializer.validated_data['balance'], timestamp=time.time()).save()
+            return Response(WalletSerializer(wallet).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminWalletDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def put(self, request, pk):
+        wallet = Wallet.objects.filter(user=User.objects.get(pk=pk)).first()
+        if request.user.is_admin:
+            serializer = WalletSerializer(wallet, data=request.data)
+            if serializer.is_valid():
+                wallet.balance += serializer.validated_data['balance']
+                wallet.save()
+                Transaction(wallet=wallet, amount=serializer.validated_data['balance'], timestamp=time.time()).save()
+                return Response(WalletSerializer(wallet).data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "You are not admin!!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TransactionListAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request):
+        transactions = Transaction.objects.filter(wallet__user=request.user)
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TransactionDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated,]
+
+    def get(self, request, pk):
+        transaction = Transaction.objects.get(pk=pk)
+        serializer = TransactionSerializer(transaction)
+        return Response(serializer.data)
