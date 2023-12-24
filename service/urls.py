@@ -8,6 +8,7 @@ urlpatterns = [
     path('service-requests/<int:pk>/update-by-customer/', ServiceRequestUpdateByCustomerView.as_view()),
     path('service-requests/<int:pk>/update-by-specialist/', ServiceRequestUpdateBySpecialistView.as_view()),
     path('service-requests/', ServiceRequestListView.as_view()),
+    path('service-requests/service-request-final-decision/<int:pk>/',ServiceRequestFinalDecisionByCustomerView.as_view()),
     path('service-types/create/', ServiceTypeCreateView.as_view()),
     path('service-types/<int:pk>/delete/', ServiceTypeDeleteView.as_view()),
     path('all-service-requests/', AllServiceRequestListView.as_view()),

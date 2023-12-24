@@ -172,3 +172,22 @@ from .models import Specialty
 class SpecialtyListView(ListAPIView):
     queryset = Specialty.objects.all()
     serializer_class = SpecialtySerializer
+
+
+class ServiceRequestFinalDecisionByCustomerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @customer_required
+    def patch(self, request, pk):
+        service_request = ServiceRequest.objects.get(pk=pk)
+        if request.user != service_request.customer.user:
+            return Response({'error': 'Not authorized'}, status=status.HTTP_403_FORBIDDEN)
+        decision = request.data.get('decision')
+        if decision.lower() == 'accept':
+            service_request.status = 'accepted'
+        elif decision.lower() == 'reject':
+            service_request.status = 'rejected'
+        else:
+            return Response({'error': 'Invalid decision. Please enter "accept" or "reject".'}, status=status.HTTP_400_BAD_REQUEST)
+        service_request.save()
+        return Response(ServiceRequestSerializer(service_request).data)
