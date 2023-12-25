@@ -1,0 +1,20 @@
+# docker-compose.yml
+version: '3'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: your_db_name
+      POSTGRES_USER: your_user
+      POSTGRES_PASSWORD: your_password
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8301:8000"
+    depends_on:
+      - db
