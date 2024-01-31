@@ -23,8 +23,8 @@ class WalletListAPIView(APIView):
 class WalletDetailAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
 
-    def get(self, request, pk):
-        wallet = Wallet.objects.get(pk=pk)
+    def get(self, request):
+        wallet = Wallet.objects.get(user=request.user)
         serializer = WalletSerializer(wallet)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

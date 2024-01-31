@@ -7,7 +7,7 @@ from django.db.models import Value
 from django.db.models.functions import Concat
 from .models import Customer, Specialist, Admin, User
 from .serializers import UserSerializer, InfoSerializer, LoginSerializer, ChangePasswordSerializer, CustomerSerializer
-from payment.views import WalletListAPIView
+from payment.views import WalletListAPIView, WalletDetailAPIView
 
 
 # Create your views here.
@@ -90,7 +90,8 @@ class UserView(APIView):
         # send_email()
         user = request.user
         serializer = InfoSerializer(user)
-        return Response(serializer.data)
+        wallet = WalletDetailAPIView().get(request)
+        return Response(serializer.data | wallet.data)
 
 
 class SpecialistInfoView(APIView):
