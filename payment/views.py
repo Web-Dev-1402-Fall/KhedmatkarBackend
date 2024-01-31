@@ -10,19 +10,18 @@ from .serializers import WalletSerializer, TransactionSerializer
 
 
 class WalletListAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
 
     def post(self, request):
-        serializer = WalletSerializer(data=request.data)
-        if serializer.is_valid():
-            if not Wallet.objects.filter(user=request.user).exists():
-                Wallet(user=request.user, balance=serializer.validated_data['balance']).save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if not Wallet.objects.filter(user=request.user).exists():
+            Wallet(user=request.user, balance=1000).save()
+            wallet = Wallet.objects.get(user=request.user)
+            return Response({"wallet_id": wallet.id, "balance": wallet.balance}, status=status.HTTP_201_CREATED)
         return Response({"error": "Wallet is already exist!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WalletDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
 
     def get(self, request, pk):
         wallet = Wallet.objects.get(pk=pk)
@@ -41,7 +40,7 @@ class WalletDetailAPIView(APIView):
 
 
 class AdminWalletDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
 
     def put(self, request, pk):
         wallet = Wallet.objects.filter(user=User.objects.get(pk=pk)).first()
@@ -57,7 +56,7 @@ class AdminWalletDetailAPIView(APIView):
 
 
 class TransactionListAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
 
     def get(self, request):
         transactions = Transaction.objects.filter(wallet__user=request.user)
@@ -66,7 +65,7 @@ class TransactionListAPIView(APIView):
 
 
 class TransactionDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
 
     def get(self, request, pk):
         transaction = Transaction.objects.get(pk=pk)

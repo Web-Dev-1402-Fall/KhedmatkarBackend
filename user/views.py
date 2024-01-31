@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 from django.db.models import Value
 from django.db.models.functions import Concat
 from .models import Customer, Specialist, Admin, User
-from .serializers import UserSerializer, LoginSerializer, ChangePasswordSerializer, CustomerSerializer
+from .serializers import UserSerializer, InfoSerializer, LoginSerializer, ChangePasswordSerializer, CustomerSerializer
+from payment.views import WalletListAPIView
 
 
 # Create your views here.
@@ -27,7 +28,9 @@ class RegisterView(APIView):
             user.save()
             s = Specialist(user=user)
             s.save()
-        return Response(serializer.data)
+        request.user = user
+        response = WalletListAPIView().post(request)
+        return Response(serializer.data | response.data)
 
 
 class AdminRegisterView(APIView):
@@ -86,7 +89,7 @@ class UserView(APIView):
     def get(self, request):
         # send_email()
         user = request.user
-        serializer = UserSerializer(user)
+        serializer = InfoSerializer(user)
         return Response(serializer.data)
 
 

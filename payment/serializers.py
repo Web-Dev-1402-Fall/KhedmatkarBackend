@@ -5,7 +5,7 @@ from .models import Wallet, Transaction
 class WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet
-        fields = ('balance',)
+        fields = ('id', 'balance',)
 
 
 class TransactionSerializer(serializers.ModelSerializer):

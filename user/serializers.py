@@ -32,6 +32,16 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
+class InfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email', 'password', 'first_name', 'last_name',
+                  'is_customer', 'is_admin', 'is_specialist')
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+
 class CustomerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
