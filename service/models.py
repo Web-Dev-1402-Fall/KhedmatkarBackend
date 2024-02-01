@@ -29,7 +29,7 @@ class ServiceRequest(models.Model):
     specialty = models.ForeignKey(Specialty, on_delete=models.CASCADE, null=True)
     description = models.TextField()
     address = models.CharField(max_length=255)
-    reception_date = models.DateTimeField()
+    reception_date = models.DateField()
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True)
     accepted_specialist = models.ForeignKey(Specialist, on_delete=models.CASCADE, null=True, blank=True)
     status = models.CharField(
