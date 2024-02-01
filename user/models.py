@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.apps import apps
 
 # Create your models here.
 class User(AbstractUser):
@@ -20,6 +20,12 @@ class Specialist(models.Model):
 
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    @property
+    def wallet(self):
+        Wallet = apps.get_model('payment', 'Wallet')  # Get the Wallet model
+        wallet = Wallet.objects.get(user=self.user)
+        return wallet
 
 
 class Admin(models.Model):

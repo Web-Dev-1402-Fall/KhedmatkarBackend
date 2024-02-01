@@ -32,6 +32,7 @@ class ServiceRequest(models.Model):
     reception_date = models.DateField()
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, null=True)
     accepted_specialist = models.ForeignKey(Specialist, on_delete=models.CASCADE, null=True, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Add a default value
     status = models.CharField(
         max_length=50,
         choices=ServiceRequestStatus.ServiceRequestStatus.choices,  # Use .choices here

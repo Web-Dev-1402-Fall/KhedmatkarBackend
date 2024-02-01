@@ -24,17 +24,25 @@ class WalletDetailAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request):
+        print("salam")
         wallet = Wallet.objects.get(user=request.user)
         serializer = WalletSerializer(wallet)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
+        print(f'Request headers: {request.META}')
+
+        if not request.META.get('HTTP_X_INTERNAL_SECRET') == 'your_internal_secret':
+            self.check_permissions(request)
         wallet = Wallet.objects.get(pk=pk)
         serializer = WalletSerializer(wallet, data=request.data)
         if serializer.is_valid():
-            wallet.balance += serializer.validated_data['balance']
+            amount = serializer.validated_data['balance']
+            if amount < 0 and wallet.balance < abs(amount):
+                return Response({"error": "Insufficient balance."}, status=status.HTTP_400_BAD_REQUEST)
+            wallet.balance += amount
             wallet.save()
-            Transaction(wallet=wallet, amount=serializer.validated_data['balance'], timestamp=time.time()).save()
+            Transaction(wallet=wallet, amount=amount, timestamp=time.time()).save()
             return Response(WalletSerializer(wallet).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

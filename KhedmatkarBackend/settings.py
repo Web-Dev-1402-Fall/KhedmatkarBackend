@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework.authtoken',
     'corsheaders',
     'drf_yasg',
     'rest_framework',
@@ -161,6 +162,5 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_HEADERS = list(default_headers) + ['Set-Cookie']
 CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', 'http://localhost:3000']
-
 
 APPEND_SLASH = False
