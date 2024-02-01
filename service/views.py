@@ -1,6 +1,9 @@
 import requests
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
+from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -127,6 +130,7 @@ class ServiceTypeDeleteView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@method_decorator(staff_member_required, name='dispatch')
 class AllServiceRequestListView(APIView):
     permission_classes = [IsAuthenticated]
 

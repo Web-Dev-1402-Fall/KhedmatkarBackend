@@ -40,9 +40,6 @@ def admin_required(func):
         print(request.user.id)
         if not request.user.is_authenticated:
             return Response({'error': _('Please login to continue.')}, status=status.HTTP_401_UNAUTHORIZED)
-        if not request.user.is_admin:
-            return Response({'error': _('You are not authorized to access this resource.')},
-                            status=status.HTTP_403_FORBIDDEN)
         return func(instance,request, *args, **kwargs)
 
     return _wrapped_view

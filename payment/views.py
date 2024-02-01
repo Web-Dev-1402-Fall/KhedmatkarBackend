@@ -1,4 +1,7 @@
 import time
+
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -47,20 +50,19 @@ class WalletDetailAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@method_decorator(login_required, name='dispatch')
 class AdminWalletDetailAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def put(self, request, pk):
         wallet = Wallet.objects.filter(user=User.objects.get(pk=pk)).first()
-        if request.user.is_admin:
-            serializer = WalletSerializer(wallet, data=request.data)
-            if serializer.is_valid():
-                wallet.balance += serializer.validated_data['balance']
-                wallet.save()
-                Transaction(wallet=wallet, amount=serializer.validated_data['balance'], timestamp=time.time()).save()
-                return Response(WalletSerializer(wallet).data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"error": "You are not admin!!"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = WalletSerializer(wallet, data=request.data)
+        if serializer.is_valid():
+            wallet.balance += serializer.validated_data['balance']
+            wallet.save()
+            Transaction(wallet=wallet, amount=serializer.validated_data['balance'], timestamp=time.time()).save()
+            return Response(WalletSerializer(wallet).data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TransactionListAPIView(APIView):

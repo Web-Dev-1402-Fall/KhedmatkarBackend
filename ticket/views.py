@@ -13,13 +13,11 @@ class CreateTicketView(APIView):
     def post(self, request):
         data = request.data
         user = request.user
-        if user.is_admin is False:
-            ticket = Ticket.objects.create(writer=user, content=data['content'], topic=data['topic'])
-            ticket.save()
-            serializer = TicketSerializer(ticket)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        ticket = Ticket.objects.create(writer=user, content=data['content'], topic=data['topic'])
+        ticket.save()
+        serializer = TicketSerializer(ticket)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response({"error": "You can't create a ticket"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class TicketListView(APIView):
