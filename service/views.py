@@ -59,6 +59,8 @@ from .entities import ServiceRequestStatus
 from user.models import Specialist
 
 
+from django.utils import timezone
+
 class ServiceRequestUpdateBySpecialistView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -70,6 +72,7 @@ class ServiceRequestUpdateBySpecialistView(APIView):
         if serializer.validated_data.get('status') == ServiceRequestStatus.ServiceRequestStatus.SPECIALIST_ACCEPTED:
             specialist_user = Specialist.objects.get(user=request.user)
             service_request.accepted_specialist = specialist_user
+            service_request.reception_date = timezone.now().date()  # set reception_date to current date
             service_request.save()
         serializer.save()
         return Response(serializer.data)
