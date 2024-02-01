@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Value
 from django.db.models.functions import Concat
-from .models import Customer, Specialist, Admin, User
+from .models import Customer, Specialist, User
 from .serializers import UserSerializer, InfoSerializer, LoginSerializer, ChangePasswordSerializer, CustomerSerializer
 from payment.views import WalletListAPIView, WalletDetailAPIView
 
@@ -31,22 +31,6 @@ class RegisterView(APIView):
         request.user = user
         response = WalletListAPIView().post(request)
         return Response(serializer.data | response.data)
-
-
-class AdminRegisterView(APIView):
-    # Todo change AllowAny
-    permission_classes = [AllowAny, ]
-
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        user.is_admin = True
-        user.save()
-        a = Admin(user=user)
-        a.save()
-
-        return Response(serializer.data)
 
 
 class LoginView(APIView):

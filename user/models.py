@@ -10,7 +10,6 @@ class User(AbstractUser):
     password = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)
     is_customer = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
     is_specialist = models.BooleanField(default=False)
 
 
@@ -28,5 +27,4 @@ class Customer(models.Model):
         return wallet
 
 
-class Admin(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
