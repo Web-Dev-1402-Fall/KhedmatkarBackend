@@ -1,7 +1,8 @@
 from django.db import models
-
-
+from service.entities import ServiceRequestStatus, ServiceRequestSpecialistStatus
+from user.models import Customer, Specialist
 # Create your models here.
+
 
 class ServiceType(models.Model):
     name = models.CharField(max_length=255)
@@ -11,18 +12,9 @@ class ServiceType(models.Model):
         return self.name
 
 
-from django.db import models
-
-
 class Specialty(models.Model):
     name = models.CharField(max_length=255)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
-
-
-from django.db import models
-from django.db.models import JSONField
-from service.entities import ServiceRequestStatus
-from user.models import Customer, Specialist
 
 
 class ServiceRequest(models.Model):
@@ -37,11 +29,6 @@ class ServiceRequest(models.Model):
         choices=ServiceRequestStatus.ServiceRequestStatus.choices,  # Use .choices here
         default=ServiceRequestStatus.ServiceRequestStatus.FINDING_SPECIALIST,
     )
-
-
-from django.db import models
-from service.entities import ServiceRequestSpecialistStatus
-from user.models import Specialist
 
 
 class ServiceRequestSpecialist(models.Model):

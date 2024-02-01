@@ -22,31 +22,11 @@ class CreateTicketView(APIView):
         return Response({"error": "You can't create a ticket"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-class AddCommentView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        data = request.data
-        user = request.user
-        ticket = Ticket.objects.filter(uuid=data['ticket_uuid']).first()
-        if ticket is None:
-            return Response({'message': 'Ticket does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-        if user.is_admin:
-            comment = Comment.objects.create(ticket=ticket, content=data['content'], writer=user)
-            serializer = CommentSerializer(comment)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        return Response({"error": "You can't add a response"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
 class TicketListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        if request.user.is_admin:
-            tickets = Ticket.objects.all()
-        else:
-            tickets = Ticket.objects.filter(writer=request.user)
+        tickets = Ticket.objects.filter(writer=request.user)
         serializer = TicketSerializer(tickets, many=True)
         return Response(serializer.data)
 
