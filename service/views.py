@@ -111,7 +111,7 @@ class ServiceRequestListView(APIView):
         if user.is_customer:
             return ServiceRequest.objects.filter(customer__user=user)
         elif user.is_specialist:
-            return ServiceRequest.objects.all()
+            return ServiceRequest.objects.exclude(status='SPECIALIST_ACCEPTED')
         else:
             return ServiceRequest.objects.none()
 
