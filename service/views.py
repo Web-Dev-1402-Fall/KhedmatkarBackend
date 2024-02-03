@@ -100,11 +100,23 @@ class ServiceRequestUpdateByCustomerView(APIView):
         return Response(serializer.data)
 
 
+from user.models import Customer, Specialist
+
 class ServiceRequestListView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        print()
+        if user.is_customer:
+            return ServiceRequest.objects.filter(customer__user=user)
+        elif user.is_specialist:
+            return ServiceRequest.objects.all()
+        else:
+            return ServiceRequest.objects.none()
+
     def get(self, request):
-        service_requests = ServiceRequest.objects.all()
+        service_requests = self.get_queryset()
         serializer = ServiceRequestSerializer(service_requests, many=True)
         return Response(serializer.data)
 
