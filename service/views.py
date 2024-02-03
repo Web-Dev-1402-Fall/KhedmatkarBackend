@@ -231,16 +231,18 @@ class ServiceRequestFinalDecisionByCustomerView(LoginRequiredMixin, APIView):
             # Get or create the token for the current user
             token, created = AuthToken.objects.get_or_create(user=request.user)
             # Call the API in the payment module to withdraw the service price from the wallet
-            response = requests.put(f'http://localhost:8000/payment/wallets/{wallet.id}/',
-                                    data={'balance': -service_request.price},
-                                    headers={
-                                        'Authorization': f'Token {token.key}',
-                                        # Include the authentication token in the headers
-                                        'X-Internal-Secret': 'your_internal_secret'  # Include the special header
-                                    })
-            if response.status_code != 200:
-                return Response({'error': 'Failed to withdraw the service price from the wallet.'},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            wallet.balance -= service_request.price
+            wallet.save()
+            # response = requests.put(f'http://localhost:8000/payment/wallets/{wallet.id}/',
+            #                         data={'balance': -service_request.price},
+            #                         headers={
+            #                             'Authorization': f'Token {token.key}',
+            #                             # Include the authentication token in the headers
+            #                             'X-Internal-Secret': 'your_internal_secret'  # Include the special header
+            #                         })
+            # if response.status_code != 200:
+            #     return Response({'error': 'Failed to withdraw the service price from the wallet.'},
+            #                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             service_request.status = 'accepted'
         elif decision.lower() == 'reject':
             service_request.status = 'rejected'
