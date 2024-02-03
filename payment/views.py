@@ -27,17 +27,14 @@ class WalletDetailAPIView(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request):
-        print("salam")
         wallet = Wallet.objects.get(user=request.user)
         serializer = WalletSerializer(wallet)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request, pk):
-        print(f'Request headers: {request.META}')
-
+    def put(self, request):
         if not request.META.get('HTTP_X_INTERNAL_SECRET') == 'your_internal_secret':
             self.check_permissions(request)
-        wallet = Wallet.objects.get(pk=pk)
+        wallet = Wallet.objects.get(user=request.user)
         serializer = WalletSerializer(wallet, data=request.data)
         if serializer.is_valid():
             amount = serializer.validated_data['balance']
