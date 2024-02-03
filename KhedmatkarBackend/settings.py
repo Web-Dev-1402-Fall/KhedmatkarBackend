@@ -90,12 +90,22 @@ WSGI_APPLICATION = 'KhedmatkarBackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# settings.py
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'my_database',
+        'USER': 'my_database_user',
+        'PASSWORD': 'my_database_password',
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
+
+# To get the database name
+db_name = DATABASES['default']['NAME']
+print(db_name)  # Outputs: my_database
 #
 # DATABASES = {
 #     'default': {
