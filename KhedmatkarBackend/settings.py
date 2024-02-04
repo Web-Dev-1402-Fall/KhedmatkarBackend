@@ -161,8 +161,10 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'http://localhost:80',
+    'http://127.0.0.1:80',
 ]
 CORS_ALLOW_HEADERS = list(default_headers) + ['Set-Cookie']
-CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', 'http://localhost:3000']
+CSRF_TRUSTED_ORIGINS = ['https://*.127.0.0.1', 'http://localhost:3000', 'http://localhost:80']
 
 APPEND_SLASH = False
